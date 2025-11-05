@@ -1,34 +1,39 @@
+// server.js – FINAL CLEAN VERSION
 import express from "express";
 import Stripe from "stripe";
-import bodyParser from "body-parser";
 import cors from "cors";
 
 const app = express();
 
+// Allow your frontend to access this backend
 app.use(
   cors({
-    origin: [
-      "https://mailrun-orlando.com",
-      "https://www.mailrun-orlando.com",
-      "http://localhost:3000",
-    ],
+    origin: ["https://mailrun-orlando.com", "http://localhost:3000"],
     methods: ["GET", "POST"],
     allowedHeaders: ["Content-Type"],
   })
 );
 
-app.use(bodyParser.json());
+app.use(express.json());
 
-// ✅ Backend must use SECRET KEY
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
+// ✅ Stripe initialization — using your secret key from Render environment
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
+  apiVersion: "2024-04-10", // stable supported version
+});
 
+// ✅ Test endpoint
 app.get("/", (req, res) => {
   res.send("✅ MailRun Stripe backend is running correctly!");
 });
 
+// ✅ Create checkout session
 app.post("/create-checkout-session", async (req, res) => {
   try {
     const { lineItems } = req.body;
+
+    if (!lineItems || !Array.isArray(lineItems) || lineItems.length === 0) {
+      return res.status(400).json({ error: "Invalid line items" });
+    }
 
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ["card"],
@@ -40,10 +45,13 @@ app.post("/create-checkout-session", async (req, res) => {
 
     res.json({ id: session.id });
   } catch (error) {
-    console.error("❌ Stripe session error:", error.message);
-    res.status(500).json({ error: error.message });
+    console.error("Stripe session creation failed:", error);
+    res
+      .status(500)
+      .json({ error: error.message || "Internal server error in Stripe setup" });
   }
 });
 
-const PORT = process.env.PORT || 5000;
+// ✅ Start the server
+const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
