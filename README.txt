@@ -7,7 +7,7 @@
 🚀 DEPLOYMENT STEPS (Render)
 1. Go to your Render Dashboard → select "MailRun Stripe Server".
 2. In "Environment Variables", confirm you have:
-      STRIPE_SECRET_KEY = sk_test_51SKOopCSZzNce3wlf0vjhJgHo8Zd2hMtCrsmavClY00gVpf3rVc3BINL4We76WDzprXkya7vFtb0G9Y8TkBBfn4I00f5hfnWaC
+      STRIPE_SECRET_KEY = 
 3. Replace existing files in your GitHub repo with these.
 4. Commit and push changes → Render will redeploy automatically.
 5. Verify logs: should see ✅ Server running on port ...
