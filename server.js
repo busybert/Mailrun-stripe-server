@@ -17,9 +17,9 @@ app.use(
 app.use(express.json());
 
 // ✅ Stripe initialization — using your secret key from Render environment
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
-  apiVersion: "2024-04-10", // stable supported version
-});
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, { apiVersion: "2024-04-10" });
+console.log("✅ Stripe key loaded:", process.env.STRIPE_SECRET_KEY ? process.env.STRIPE_SECRET_KEY.slice(0, 10) + "..." : "❌ NOT FOUND");
+
 
 // ✅ Test endpoint
 app.get("/", (req, res) => {
