@@ -5,37 +5,49 @@ import Stripe from "stripe";
 
 const app = express();
 
-// 🔑 Stripe client (Render will provide STRIPE_SECRET_KEY as env var)
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
+// 🔑 Read Stripe secret key from environment
+const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
+
+if (!stripeSecretKey) {
+  console.error("❌ STRIPE_SECRET_KEY is not set. Please add it in Render → Environment.");
+  // Exit so Render shows a clear error instead of running a broken server
+  process.exit(1);
+}
+
+const stripe = new Stripe(stripeSecretKey, {
+  apiVersion: "2024-06-20" // safe to specify; Stripe will ignore if not needed
+});
 
 // ✅ Allow your frontend (Hostinger) to talk to this backend (Render)
 app.use(
   cors({
-origin: [
-  "https://mailrunorlando.com",
-  "http://localhost:3000",
-  "http://localhost:5173"
-]
+    origin: [
+      "https://mailrunorlando.com",
+      "http://localhost:3000",
+      "http://localhost:5173"
+    ]
   })
 );
 
 app.use(express.json());
 
 // 🧾 Map the keys from your React app to Stripe Price IDs
-// REPLACE ALL THE "price_xxx" STRINGS WITH YOUR REAL STRIPE PRICE IDS
+// IMPORTANT: these price_ IDs must all be from the SAME STRIPE MODE
+// - If STRIPE_SECRET_KEY is sk_test_..., these must be TEST price IDs
+// - If STRIPE_SECRET_KEY is sk_live_..., these must be LIVE price IDs
 const PRICE_LOOKUP = {
   // One-time pickup services
-  standard: "price_1SOtK2CSZzNce3wln59DxSBU ",        // $12 Standard Pickup
-  promo: "price_1SOtmgCSZzNce3wlZw96Hvz6",              // $9 PROMO
-  rush: "price_1SOtneCSZzNce3wl32oQtOz6",                // $19 Rush
-  payPerPickup: "price_1SSsXqCSZzNce3wlb5SJpzJ4",// $9.99 AMAZON Returns Pay-per Pickup
+  standard: "price_1SOtK2CSZzNce3wln59DxSBU",      // $12 Standard Pickup
+  promo: "price_1SOtmgCSZzNce3wlZw96Hvz6",         // $9 PROMO
+  rush: "price_1SOtneCSZzNce3wl32oQtOz6",          // $19 Rush
+  payPerPickup: "price_1SSsXqCSZzNce3wlb5SJpzJ4",  // $9.99 AMAZON Returns Pay-per Pickup
 
   // Add-ons
-  heavy: "price_1SOtryCSZzNce3wlp8vzotyR",           // $6 Heavy Box
-  addBox: "price_1SOtsvCSZzNce3wllMLW0cAC",            // $3 Add a Box
+  heavy: "price_1SOtryCSZzNce3wlp8vzotyR",         // $6 Heavy Box
+  addBox: "price_1SOtsvCSZzNce3wllMLW0cAC",        // $3 Add a Box
 
   // Subscriptions – AMAZON Returns Subscribe & Save
-  subMonthly: "price_1SSsfECSZzNce3wlqnSEkWhS",   // $19.99 / month
+  subMonthly: "price_1SSsfECSZzNce3wlqnSEkWhS",    // $19.99 / month
   subAnnual: "price_1SSsghCSZzNce3wltR9tp3u9"      // $199.99 / year
 };
 
@@ -73,8 +85,8 @@ app.post("/api/checkout", async (req, res) => {
       mode,
       line_items,
       success_url:
-        success_url: "https://mailrunorlando.com/success?session_id={CHECKOUT_SESSION_ID}",
-cancel_url: "https://mailrunorlando.com/pricing"
+        "https://mailrunorlando.com/success?session_id={CHECKOUT_SESSION_ID}",
+      cancel_url: "https://mailrunorlando.com/pricing"
     });
 
     return res.json({ url: session.url });
