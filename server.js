@@ -15,46 +15,47 @@ if (!stripeSecretKey) {
   process.exit(1);
 }
 
-// Optional: lock to an API version (safe)
+// Optional: fix Stripe API version
 const stripe = new Stripe(stripeSecretKey, {
   apiVersion: "2024-06-20"
 });
 
-// ✅ Allow requests from ANY origin while testing
-// (you can tighten this later if you want)
+// ✅ Allow ALL origins + Fix Preflight CORS
 app.use(cors());
+app.options("*", cors());
 
 app.use(express.json());
 
-// 🧾 Map the keys from your React app to Stripe Price IDs
-// Make sure these price_ IDs match the Stripe mode of your key (test vs live)
+// 🧾 LIVE PRICE IDs (you provided these)
 const PRICE_LOOKUP = {
   // One-time pickup services
-  standard: "price_1SOtK2CSZzNce3wln59DxSBU",      // $12 Standard Pickup
-  promo: "price_1SOtmgCSZzNce3wlZw96Hvz6",         // $9 PROMO
-  rush: "price_1SOtneCSZzNce3wl32oQtOz6",          // $19 Rush
-  payPerPickup: "price_1SSsXqCSZzNce3wlb5SJpzJ4",  // $9.99 AMAZON Returns Pay-per Pickup
+  standard: "price_1SP71s2E8UrZzRbd8HSF8ile",    // $12 Standard
+  promo: "price_1SP72n2E8UrZzRbdz5FncYGG",       // $9 Promo
+  rush: "price_1SP73c2E8UrZzRbdVEqSv5SM",        // $19 Rush
+
+  // Amazon special services
+  payPerPickup: "price_1SSsXqCSZzNce3wlb5SJpzJ4", // $9.99 Amazon Daily (one-time)
 
   // Add-ons
-  heavy: "price_1SOtryCSZzNce3wlp8vzotyR",         // $6 Heavy Box
-  addBox: "price_1SOtsvCSZzNce3wllMLW0cAC",        // $3 Add a Box
+  heavy: "price_1SP7My2E8UrZzRbdxAMRieAy",        // $6 Heavy Box
+  addBox: "price_1SP7Nt2E8UrZzRbd9GEmyrkf",        // $3 Add a Box
 
   // Subscriptions – AMAZON Returns Subscribe & Save
-  subMonthly: "price_1SSsfECSZzNce3wlqnSEkWhS",    // $19.99 / month
-  subAnnual: "price_1SSsghCSZzNce3wltR9tp3u9"      // $199.99 / year
+  subMonthly: "price_1SSv372E8UrZzRbdvB2HJ4VA",   // $19.99 monthly
+  subAnnual: "price_1SSv6e2E8UrZzRbdVqkqKeFi"     // $199.99 yearly
 };
 
-// 🧠 Helper to decide if any item is a subscription
+// 🧠 Detect subscription checkout
 function hasSubscriptionItem(items = []) {
   return items.some(
     (item) => item.key === "subMonthly" || item.key === "subAnnual"
   );
 }
 
-// 📦 Checkout route – this is what your frontend calls via redirectToCheckout()
+// 📦 Checkout endpoint
 app.post("/api/checkout", async (req, res) => {
   try {
-    const { items } = req.body; // [{ key, quantity }, ...]
+    const { items } = req.body;
     console.log("📦 Incoming checkout items:", items);
 
     if (!Array.isArray(items) || items.length === 0) {
@@ -85,19 +86,20 @@ app.post("/api/checkout", async (req, res) => {
     });
 
     console.log("✅ Stripe session created:", session.id);
-    return res.json({ url: session.url });
+    res.json({ url: session.url });
+
   } catch (err) {
     console.error("❌ Checkout error:", err);
-    return res.status(500).json({ error: err.message });
+    res.status(500).json({ error: err.message });
   }
 });
 
-// Simple health check route
+// Health check
 app.get("/", (req, res) => {
-  res.send("MailRun Stripe server is running ✅");
+  res.send("MailRun Stripe server is running LIVE mode ✅");
 });
 
-// Render sets PORT for you
+// Render port
 const port = process.env.PORT || 10000;
 app.listen(port, () => {
   console.log(`🚀 Server listening on port ${port}`);
