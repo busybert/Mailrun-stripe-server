@@ -10,31 +10,22 @@ const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
 
 if (!stripeSecretKey) {
   console.error("❌ STRIPE_SECRET_KEY is not set. Please add it in Render → Environment.");
-  // Exit so Render shows a clear error instead of running a broken server
   process.exit(1);
 }
 
+// Optional: lock to an API version
 const stripe = new Stripe(stripeSecretKey, {
-  apiVersion: "2024-06-20" // safe to specify; Stripe will ignore if not needed
+  apiVersion: "2024-06-20"
 });
 
-// ✅ Allow your frontend (Hostinger) to talk to this backend (Render)
-app.use(
-  cors({
-    origin: [
-      "https://mailrunorlando.com",
-      "http://localhost:3000",
-      "http://localhost:5173"
-    ]
-  })
-);
+// ✅ Allow requests from ANY origin while testing
+// (we can tighten this later if you like)
+app.use(cors());
 
 app.use(express.json());
 
 // 🧾 Map the keys from your React app to Stripe Price IDs
-// IMPORTANT: these price_ IDs must all be from the SAME STRIPE MODE
-// - If STRIPE_SECRET_KEY is sk_test_..., these must be TEST price IDs
-// - If STRIPE_SECRET_KEY is sk_live_..., these must be LIVE price IDs
+// Make sure these price_ IDs match the Stripe mode of your key (test vs live)
 const PRICE_LOOKUP = {
   // One-time pickup services
   standard: "price_1SOtK2CSZzNce3wln59DxSBU",      // $12 Standard Pickup
