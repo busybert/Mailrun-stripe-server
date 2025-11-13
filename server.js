@@ -9,17 +9,19 @@ const app = express();
 const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
 
 if (!stripeSecretKey) {
-  console.error("❌ STRIPE_SECRET_KEY is not set. Please add it in Render → Environment.");
+  console.error(
+    "❌ STRIPE_SECRET_KEY is not set. Please add it in Render → Environment."
+  );
   process.exit(1);
 }
 
-// Optional: lock to an API version
+// Optional: lock to an API version (safe)
 const stripe = new Stripe(stripeSecretKey, {
   apiVersion: "2024-06-20"
 });
 
 // ✅ Allow requests from ANY origin while testing
-// (we can tighten this later if you like)
+// (you can tighten this later if you want)
 app.use(cors());
 
 app.use(express.json());
@@ -53,12 +55,14 @@ function hasSubscriptionItem(items = []) {
 app.post("/api/checkout", async (req, res) => {
   try {
     const { items } = req.body; // [{ key, quantity }, ...]
+    console.log("📦 Incoming checkout items:", items);
 
     if (!Array.isArray(items) || items.length === 0) {
       return res.status(400).json({ error: "No items to checkout" });
     }
 
     const mode = hasSubscriptionItem(items) ? "subscription" : "payment";
+    console.log("💳 Checkout mode:", mode);
 
     const line_items = items.map((item) => {
       const priceId = PRICE_LOOKUP[item.key];
@@ -80,9 +84,10 @@ app.post("/api/checkout", async (req, res) => {
       cancel_url: "https://mailrunorlando.com/pricing"
     });
 
+    console.log("✅ Stripe session created:", session.id);
     return res.json({ url: session.url });
   } catch (err) {
-    console.error("Checkout error:", err);
+    console.error("❌ Checkout error:", err);
     return res.status(500).json({ error: err.message });
   }
 });
@@ -95,5 +100,5 @@ app.get("/", (req, res) => {
 // Render sets PORT for you
 const port = process.env.PORT || 10000;
 app.listen(port, () => {
-  console.log(`Server listening on port ${port}`);
+  console.log(`🚀 Server listening on port ${port}`);
 });
