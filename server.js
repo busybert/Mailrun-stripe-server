@@ -41,7 +41,7 @@ const PRICE_LOOKUP = {
   addBox: "price_1SP7Nt2E8UrZzRbd9GEmyrkf",        // $3 Add a Box
 
   // Subscriptions – AMAZON Returns Subscribe & Save
-  subMonthly: "price_1SSv372E8UrZzRbdvB2HJ4VA",   // $19.99 monthly
+  subMonthly: "price_1SSv5K2E8UrZzRbdVdPlsu9T",   // $19.99 monthly
   subAnnual: "price_1SSv6e2E8UrZzRbdVqkqKeFi"     // $199.99 yearly
 };
 
