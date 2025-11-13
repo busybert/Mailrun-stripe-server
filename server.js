@@ -34,7 +34,7 @@ const PRICE_LOOKUP = {
   rush: "price_1SP73c2E8UrZzRbdVEqSv5SM",        // $19 Rush
 
   // Amazon special services
-  payPerPickup: "price_1SSsXqCSZzNce3wlb5SJpzJ4", // $9.99 Amazon Daily (one-time)
+  payPerPickup: "price_1SSv372E8UrZzRbdvB2HJ4VA", // $9.99 Amazon Daily (one-time)
 
   // Add-ons
   heavy: "price_1SP7My2E8UrZzRbdxAMRieAy",        // $6 Heavy Box
