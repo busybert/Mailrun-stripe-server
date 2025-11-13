@@ -11,11 +11,11 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 // ✅ Allow your frontend (Hostinger) to talk to this backend (Render)
 app.use(
   cors({
-    origin: [
-      "https://YOUR-HOSTINGER-DOMAIN.com", // ← change to your real site
-      "http://localhost:3000",             // optional: local dev
-      "http://localhost:5173"              // optional: Vite dev
-    ]
+origin: [
+  "https://mailrunorlando.com",
+  "http://localhost:3000",
+  "http://localhost:5173"
+]
   })
 );
 
@@ -25,18 +25,18 @@ app.use(express.json());
 // REPLACE ALL THE "price_xxx" STRINGS WITH YOUR REAL STRIPE PRICE IDS
 const PRICE_LOOKUP = {
   // One-time pickup services
-  standard: "price_STANDARD_ID",        // $12 Standard Pickup
-  promo: "price_PROMO_ID",              // $9 PROMO
-  rush: "price_RUSH_ID",                // $19 Rush
-  payPerPickup: "price_PAYPERPICKUP_ID",// $9.99 AMAZON Returns Pay-per Pickup
+  standard: "price_1SOtK2CSZzNce3wln59DxSBU ",        // $12 Standard Pickup
+  promo: "price_1SOtmgCSZzNce3wlZw96Hvz6",              // $9 PROMO
+  rush: "price_1SOtneCSZzNce3wl32oQtOz6",                // $19 Rush
+  payPerPickup: "price_1SSsXqCSZzNce3wlb5SJpzJ4",// $9.99 AMAZON Returns Pay-per Pickup
 
   // Add-ons
-  heavy: "price_HEAVYBOX_ID",           // $6 Heavy Box
-  addBox: "price_ADDBOX_ID",            // $3 Add a Box
+  heavy: "price_1SOtryCSZzNce3wlp8vzotyR",           // $6 Heavy Box
+  addBox: "price_1SOtsvCSZzNce3wllMLW0cAC",            // $3 Add a Box
 
   // Subscriptions – AMAZON Returns Subscribe & Save
-  subMonthly: "price_SUB_MONTHLY_ID",   // $19.99 / month
-  subAnnual: "price_SUB_ANNUAL_ID"      // $199.99 / year
+  subMonthly: "price_1SSsfECSZzNce3wlqnSEkWhS",   // $19.99 / month
+  subAnnual: "price_1SSsghCSZzNce3wltR9tp3u9"      // $199.99 / year
 };
 
 // 🧠 Helper to decide if any item is a subscription
@@ -73,8 +73,8 @@ app.post("/api/checkout", async (req, res) => {
       mode,
       line_items,
       success_url:
-        "https://YOUR-HOSTINGER-DOMAIN.com/success?session_id={CHECKOUT_SESSION_ID}",
-      cancel_url: "https://YOUR-HOSTINGER-DOMAIN.com/pricing"
+        success_url: "https://mailrunorlando.com/success?session_id={CHECKOUT_SESSION_ID}",
+cancel_url: "https://mailrunorlando.com/pricing"
     });
 
     return res.json({ url: session.url });
